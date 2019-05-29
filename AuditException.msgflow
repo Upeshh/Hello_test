@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:CommonAuditRequest.msgflow="CommonAuditRequest.msgflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="AuditException.msgflow"
+    nsPrefix="AuditException.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_FuncId" name="AuditException_FuncId">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_TrackingPoint" name="AuditException_TrackingPoint" defaultValueLiteral="11904">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_MessageType" name="AuditException_MessageType">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_TableName" name="AuditException_TableName">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_ChannelId" name="AuditException_ChannelId">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.AuditException_TargetDB" name="AuditException_TargetDB">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="AuditException" bundleName="AuditException" pluginId="Common_Flows"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/Common_Flows/icons/full/obj16/AuditException.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/Common_Flows/icons/full/obj30/AuditException.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="103,192">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="AuditException" pluginId="Common_Flows"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="249,192" computeExpression="esql://routine/#AuditException_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="Compute"/>
+      </nodes>
+      <nodes xmi:type="CommonAuditRequest.msgflow:FCMComposite_1" xmi:id="FCMComposite_1_2" location="406,193" PreAuditRequest="esql://routine/#AuditException_AuditMessage.Main">
+        <translation xmi:type="utility:ConstantString" string="AuditMessage"/>
+      </nodes>
+      <nodes xmi:type="CommonAuditRequest.msgflow:FCMComposite_1" xmi:id="FCMComposite_1_3" location="590,193" PreAuditRequest="esql://routine/#AuditException_AuditException.Main">
+        <translation xmi:type="utility:ConstantString" string="AuditException"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_1" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_FuncId">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_FuncId" bundleName="AuditException" pluginId="Common_Flows"/>
+        <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_TrackingPoint">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_TrackingPoint" bundleName="AuditException" pluginId="Common_Flows"/>
+          <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_MessageType">
+            <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_MessageType" bundleName="AuditException" pluginId="Common_Flows"/>
+            <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_TableName">
+              <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_TableName" bundleName="AuditException" pluginId="Common_Flows"/>
+              <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_ChannelId">
+                <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_ChannelId" bundleName="AuditException" pluginId="Common_Flows"/>
+                <propertyDescriptor groupName="Group.Logging" configurable="true" userDefined="true" describedAttribute="Property.AuditException_TargetDB">
+                  <propertyName xmi:type="utility:TranslatableString" key="Property.AuditException_TargetDB" bundleName="AuditException" pluginId="Common_Flows"/>
+                </propertyDescriptor>
+              </propertyDescriptor>
+            </propertyDescriptor>
+          </propertyDescriptor>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

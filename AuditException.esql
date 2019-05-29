@@ -1,0 +1,159 @@
+DECLARE AuditException_FuncId EXTERNAL CHARACTER '';
+DECLARE AuditException_TrackingPoint EXTERNAL CHARACTER '';
+DECLARE AuditException_MessageType EXTERNAL CHARACTER '';
+DECLARE AuditException_TableName EXTERNAL CHARACTER '';
+DECLARE AuditException_ChannelId EXTERNAL CHARACTER '';
+DECLARE AuditException_TargetDB EXTERNAL CHARACTER '';
+
+/**
+ * Use this procedure to set AuditException variables. Leaving one
+ * of these parameters empty (NULL), the subflow will try to use
+ * UDPs, if existing. This procedure should be called before
+ * routing execution to this subflow.
+ *
+ *  
+ * Sample:
+ *
+		CALL SetAuditExceptionVars(
+			 -- IN SR_ID CHARACTER
+			,  -- IN FuncId CHARACTER
+			,  -- IN ChannelId CHARACTER
+			,  -- IN TrackingPoint CHARACTER
+			,  -- IN MSISDN CHARACTER
+			,  -- IN MessageType CHARACTER
+			,  -- IN Status CHARACTER
+			,  -- IN TableName CHARACTER
+			, NULL -- IN TargetDB CHARACTER
+			, Environment
+		);
+ */
+CREATE PROCEDURE SetAuditExceptionVars(
+		 IN SR_ID CHARACTER
+		, IN FuncId CHARACTER
+		, IN ChannelId CHARACTER
+		, IN TrackingPoint CHARACTER
+		, IN MSISDN CHARACTER
+		, IN MessageType CHARACTER
+		, IN Status CHARACTER
+		, IN TableName CHARACTER
+		, IN TargetDB CHARACTER
+		, IN Environment REFERENCE
+	)
+BEGIN
+	SET Environment.Variables.AuditException = '';
+	DECLARE AuditExceptionVars REFERENCE TO Environment.Variables.AuditException;
+	
+	SET AuditExceptionVars.SR_ID = SR_ID;
+	SET AuditExceptionVars.FuncId = FuncId;
+	SET AuditExceptionVars.ChannelId = ChannelId;
+	SET AuditExceptionVars.TrackingPoint = TrackingPoint;
+	SET AuditExceptionVars.MSISDN = MSISDN;
+	SET AuditExceptionVars.MessageType = MessageType;
+	SET AuditExceptionVars.Status = Status;
+	SET AuditExceptionVars.TableName = TableName;
+	SET AuditExceptionVars.TargetDB = TargetDB;
+END;
+
+
+CREATE COMPUTE MODULE AuditException_AuditMessage
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyEntireMessage();
+		DECLARE AuditExceptionVars REFERENCE TO Environment.Variables.AuditException;
+
+		SET Environment.Variables.SRID = COALESCE(AuditExceptionVars.SR_ID, Environment.Variables.SRID,  Environment.Variables.AuditRequest.SRID
+											,SUBSTRING(Cast(InputRoot.MQMD.MsgId as CHARACTER) FROM 3 FOR 48));
+											
+		CALL SetAuditRequestEnvironmentVariables(Environment.Variables.SRID -- SRID CHARACTER
+												, AuditExceptionVars.FuncId -- FuncId CHARACTER
+												, AuditExceptionVars.TrackingPoint -- IN TrackPointId CHARACTER
+												, AuditExceptionVars.MSISDN -- MSISDN CHARACTER
+												, AuditExceptionVars.Status -- IN Status CHARACTER
+												, AuditExceptionVars.MessageType || '_MSG' -- MessageType CHARACTER
+												, AuditExceptionVars.TableName -- TableName CHARACTER
+												, AuditExceptionVars.ChannelId -- ChannelId CHARACTER
+												, AuditExceptionVars.TargetDB -- TargetDB CHARACTER
+												, Environment
+		);
+		
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
+
+
+CREATE COMPUTE MODULE AuditException_AuditException
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		DECLARE AuditExceptionVars REFERENCE TO Environment.Variables.AuditException;
+
+		SET OutputRoot.BLOB.BLOB = CAST (Environment.Variables.ErrorInfo.CompleteErrorMsg AS BLOB 
+																							CCSID 1208
+																							ENCODING 546);
+		CALL SetAuditRequestEnvironmentVariables(Environment.Variables.SRID -- SRID CHARACTER
+												, AuditExceptionVars.FuncId -- FuncId CHARACTER
+												, AuditExceptionVars.TrackingPoint -- IN TrackPointId CHARACTER
+												, AuditExceptionVars.MSISDN -- MSISDN CHARACTER
+												, AuditExceptionVars.Status -- IN Status CHARACTER
+												, 'EXCEPTION' -- MessageType CHARACTER
+												, AuditExceptionVars.TableName -- TableName CHARACTER
+												, AuditExceptionVars.ChannelId -- ChannelId CHARACTER
+												, AuditExceptionVars.TargetDB -- TargetDB CHARACTER
+												, Environment
+		);
+
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+END MODULE;
+
+
+CREATE COMPUTE MODULE AuditException_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		
+		-- Reset message to BLOB parser. This is very important to handle parser exceptions
+		SET OutputRoot.BLOB.BLOB = ASBITSTREAM(InputBody);
+		
+		-- Set logging variables
+		IF NOT EXISTS(Environment.Variables.AuditException[]) THEN
+			CREATE FIELD Environment.Variables.AuditException;
+		END IF;
+		
+		DECLARE AuditExceptionVars REFERENCE TO Environment.Variables.AuditException;
+		
+		SET AuditExceptionVars.FuncId = COALESCE(AuditExceptionVars.FuncId, AuditException_FuncId);
+		SET AuditExceptionVars.ChannelId = COALESCE(AuditExceptionVars.ChannelId, AuditException_ChannelId);
+		SET AuditExceptionVars.TrackingPoint = COALESCE(AuditExceptionVars.TrackingPoint, AuditException_TrackingPoint);
+		SET AuditExceptionVars.MessageType = COALESCE(AuditExceptionVars.MessageType, AuditException_MessageType);
+		SET AuditExceptionVars.Status = COALESCE(AuditExceptionVars.Status, STATUS_FAILED);
+		SET AuditExceptionVars.TableName = COALESCE(AuditExceptionVars.TableName, AuditException_TableName);
+		SET AuditExceptionVars.TargetDB = COALESCE(AuditExceptionVars.TargetDB, AuditException_TargetDB);
+
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+END MODULE;
